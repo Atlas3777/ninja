@@ -43,12 +43,12 @@ namespace ninja
             _sprites = new();
 
             Texture2D playerTexture = Content.Load<Texture2D>("player");
-            Texture2D enemyTexture = Content.Load<Texture2D>("player");
+            Texture2D enemyTexture = Content.Load<Texture2D>("enemy");
 
 
-            _sprites.Add(new Sprite(enemyTexture, new Vector2(100, 100)));
-            _sprites.Add(new Sprite(enemyTexture, new Vector2(400, 200)));
-            _sprites.Add(new Sprite(enemyTexture, new Vector2(700, 300)));
+            _sprites.Add(new Player(enemyTexture, new Vector2(100, 100)));
+            _sprites.Add(new Player(enemyTexture, new Vector2(400, 200)));
+            _sprites.Add(new Player(enemyTexture, new Vector2(700, 300)));
 
             _sprites.Add(new Player(playerTexture, new Vector2(200, 200)));
 
@@ -126,8 +126,6 @@ namespace ninja
             {
                 sprite.Draw(_spriteBatch);
             }
-
-
 
             _spriteBatch.End();
 

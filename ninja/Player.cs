@@ -11,20 +11,21 @@ namespace ninja
 {
     internal class Player : Sprite
     {
+        float speed = 5f;
         public Player(Texture2D texture, Vector2 position) : base(texture, position) { }
-
+            
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
             if (Keyboard.GetState().IsKeyDown(Keys.Right))
-                position.X += 1;
+                position.X += speed;
             if (Keyboard.GetState().IsKeyDown(Keys.Left))
-                position.X -= 1;
+                position.X -= speed;
             if (Keyboard.GetState().IsKeyDown(Keys.Up))
-                position.Y -= 1;
-            if (Keyboard.GetState().IsKeyDown(Keys.Right))
-                position.Y += 1;
+                position.Y -= speed;
+            if (Keyboard.GetState().IsKeyDown(Keys.Down))
+                position.Y += speed;
 
         }
     }
