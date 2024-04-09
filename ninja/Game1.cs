@@ -51,6 +51,7 @@ namespace ninja
             _sprites.Add(new Sprite(enemyTexture, new Vector2(100, 100)));
             _sprites.Add(new Sprite(enemyTexture, new Vector2(400, 200)));
             _sprites.Add(new Sprite(enemyTexture, new Vector2(700, 300)));
+            _sprites.Add(new Sprite(enemyTexture, new Vector2(100, 300)));
 
             player = new Player(playerTexture, new Vector2(200, 200));
 
