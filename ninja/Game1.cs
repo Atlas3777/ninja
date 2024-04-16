@@ -1,8 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Xna.Framework.Audio;
+using System.IO;
 
 namespace ninja
 {
@@ -10,17 +13,24 @@ namespace ninja
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        private SceneManager sceneManager;
+        private FollowCamera camera;
 
-        private Player player;
+        Texture2D spriteSheet;
 
-        List<Sprite> _sprites;
-
+        AnimationManager am;
+       
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            sceneManager = new();
+            
+            //camera = new(Vector2.Zero);
         }
+
+        
 
         protected override void Initialize()
         {
@@ -31,17 +41,12 @@ namespace ninja
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            _sprites = new();
+            am = new(2, 2, new Vector2(8, 8));
 
-            Texture2D playerTexture = Content.Load<Texture2D>("player");
-            Texture2D enemyTexture = Content.Load<Texture2D>("enemy");
+            sceneManager.AddScane(new GameScene(Content, sceneManager));
 
-            _sprites.Add(new Sprite(enemyTexture, new Vector2(100, 100)));
-            _sprites.Add(new Sprite(enemyTexture, new Vector2(400, 200)));
-            _sprites.Add(new Sprite(enemyTexture, new Vector2(700, 300)));
-            _sprites.Add(new Sprite(enemyTexture, new Vector2(100, 300)));
+            
 
-            player = new Player(playerTexture, new Vector2(200, 200));
         }
 
         protected override void Update(GameTime gameTime)
@@ -49,23 +54,13 @@ namespace ninja
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            player.Update(gameTime);
+            //camera.Follow(pla)
 
-            List<Sprite> killList = new();
-            foreach (var sprite in _sprites)
-            {
-                sprite.Update(gameTime);
+            sceneManager.GetCurrentScene().Update(gameTime);
 
-                if (sprite.Rect.Intersects(player.Rect))
-                {
-                    killList.Add(sprite);
-                }
-            }
 
-            foreach (var sprite in killList)
-            {
-                _sprites.Remove(sprite);
-            }
+            am.Update();
+            
 
             base.Update(gameTime);
         }
@@ -76,11 +71,9 @@ namespace ninja
 
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-            foreach (var sprite in _sprites)
-            {
-                sprite.Draw(_spriteBatch);
-            }
-            player.Draw(_spriteBatch);
+            sceneManager.GetCurrentScene().Draw(_spriteBatch, am);
+
+            
 
             _spriteBatch.End();
 

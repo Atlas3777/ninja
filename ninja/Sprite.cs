@@ -10,7 +10,7 @@ namespace ninja
 {
     internal class Sprite
     {
-        private static readonly float SCALE = 5f;
+        private static readonly float SCALE = 20f;
 
         public Texture2D texture;
         public Vector2 position;
