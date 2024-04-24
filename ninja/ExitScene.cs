@@ -18,7 +18,7 @@ namespace ninja
             this.contentManager = contentManager;
         }
 
-        public void Draw(SpriteBatch spriteBatch, AnimationManager am)
+        public void Draw(SpriteBatch spriteBatch)
         {
             
         }

@@ -7,6 +7,6 @@ namespace ninja
     {
         public void Load();
         public void Update(GameTime gameTame);
-        public void Draw(SpriteBatch spriteBatch, AnimationManager animationManager);
+        public void Draw(SpriteBatch spriteBatch);
     }
 }

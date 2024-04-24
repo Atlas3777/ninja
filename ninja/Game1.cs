@@ -16,18 +16,23 @@ namespace ninja
         private SceneManager sceneManager;
         private FollowCamera camera;
 
-        Texture2D spriteSheet;
 
-        AnimationManager am;
+        Animation animationManager;
        
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
+
+            //TODO:Реализовать измениение разрешения 
+            _graphics.IsFullScreen = true;
+            _graphics.PreferredBackBufferWidth = 1920;
+            _graphics.PreferredBackBufferHeight = 1080;
+            
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             sceneManager = new();
-            
-            //camera = new(Vector2.Zero);
+
+            camera = new FollowCamera(Vector2.Zero);
         }
 
         
@@ -41,12 +46,7 @@ namespace ninja
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            am = new(2, 2, new Vector2(8, 8));
-
             sceneManager.AddScane(new GameScene(Content, sceneManager));
-
-            
-
         }
 
         protected override void Update(GameTime gameTime)
@@ -58,10 +58,8 @@ namespace ninja
 
             sceneManager.GetCurrentScene().Update(gameTime);
 
-
-            am.Update();
+            //animationManager.Update();
             
-
             base.Update(gameTime);
         }
 
@@ -71,9 +69,9 @@ namespace ninja
 
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-            sceneManager.GetCurrentScene().Draw(_spriteBatch, am);
+            sceneManager.GetCurrentScene().Draw(_spriteBatch);
 
-            
+            //animationManager.Drow(_spriteBatch, spriteSheet);
 
             _spriteBatch.End();
 

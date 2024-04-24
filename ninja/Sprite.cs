@@ -17,7 +17,7 @@ namespace ninja
 
         public Rectangle Rect
         {
-            get
+            get 
             {
                 return new Rectangle(
                     (int)position.X,

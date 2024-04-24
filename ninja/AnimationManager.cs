@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +9,9 @@ using System.Threading.Tasks;
 
 namespace ninja
 {
-    public class AnimationManager
+    public class Animation
     {
+        #region prop
         int frameCount;
         int columsCount;
         Vector2 size;
@@ -19,9 +22,14 @@ namespace ninja
 
         int rowPos;
         int colPos;
+        #endregion
 
+        Texture2D spriteSheet;
 
-        public AnimationManager(int frameCount, int columsCount, Vector2 size)
+        public Vector2 position;
+
+        public Animation
+            (int frameCount, int columsCount, Vector2 size/*, Texture2D spriteSheet*/)
         {
             this.frameCount = frameCount;
             this.columsCount = columsCount;
@@ -32,9 +40,11 @@ namespace ninja
             interval = 30;
 
             rowPos = 0; colPos = 0;
+
+            //this.spriteSheet = spriteSheet;
         }
 
-        public void Update()
+        public virtual void Update()
         {
             counter++;
             if (counter > interval)
@@ -42,8 +52,8 @@ namespace ninja
                 counter = 0;
                 NextFrame();
             }
-                
         }
+
         private void NextFrame()
         {
             activeFrame++;
@@ -67,6 +77,16 @@ namespace ninja
             colPos = 0;
             rowPos = 0;
         }
+
+        public virtual void Drow(SpriteBatch spriteBatch, Texture2D spriteSheet)
+        {
+            spriteBatch.Draw(
+                spriteSheet,
+                this.RectPositions,
+                this.GetFrame(),
+                Color.White);
+        }
+
         public Rectangle GetFrame()
         {
             return new Rectangle(
@@ -75,6 +95,18 @@ namespace ninja
                 (int)size.X,
                 (int)size.Y
                 );
+        }
+
+        public Rectangle RectPositions
+        {
+            get
+            {
+                return new Rectangle(
+                    (int)position.X,
+                    (int)position.Y,
+                    (int)size.X*20,
+                    (int)size.Y*20);
+            }
         }
     }
 }

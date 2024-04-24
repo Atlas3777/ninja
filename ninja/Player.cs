@@ -9,22 +9,26 @@ using System.Threading.Tasks;
 
 namespace ninja
 {
-    internal class Player : Sprite
+    internal class Player
     { 
         private readonly List<Sprite> collisionsGroup;
         private readonly float speed = 5f;
+        private Animation animationManager;
 
+        public Vector2 position;
+        public float SCALE = 20f;
 
         public float Speed => speed;
 
-        public Player(Texture2D texture, Vector2 position, List<Sprite> collisionsGroup) :
-            base(texture, position)
+        public Player(Animation animationManager)
         {
             this.collisionsGroup = collisionsGroup;
+            this.animationManager = animationManager;
+
         }
-        public override void Update(GameTime gameTime)
+        public void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
+            animationManager.Update();
 
             var changeX = 0f;
 
@@ -34,13 +38,13 @@ namespace ninja
                 changeX -= Speed;
             position.X += changeX;
 
-            foreach (var sprite in collisionsGroup)
-            {
-                if (sprite != this && sprite.Rect.Intersects(Rect))
-                {
-                    position.X -= changeX;
-                }
-            }
+            //foreach (var sprite in collisionsGroup)
+            //{
+            //    if ( sprite.Rect.Intersects(RectPositions))
+            //    {
+            //        position.X -= changeX;
+            //    }
+            //}
 
             var changeY = 0f;
 
@@ -51,13 +55,17 @@ namespace ninja
 
             position.Y += changeY;
 
-            foreach (var sprite in collisionsGroup)
-            {
-                if (sprite != this && sprite.Rect.Intersects(Rect))
-                {
-                    position.Y -= changeY;
-                }
-            }
+            //foreach (var sprite in collisionsGroup)
+            //{
+            //    if (sprite.Rect.Intersects(RectPositions))
+            //    {
+            //        position.Y -= changeY;
+            //    }
+            //}
         }
+        //public void Drow(SpriteBatch spriteBatch, Texture2D spriteSheet)
+        //{
+        //    animationManager.Drow(spriteBatch, spriteSheet);
+        //}
     }
 }
