@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Audio;
 using System.IO;
+using ninja.Controller;
+using Penumbra;
 
 namespace ninja
 {
@@ -14,14 +16,14 @@ namespace ninja
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private SceneManager sceneManager;
-        private FollowCamera camera;
+        private PenumbraComponent penumbra;
 
-
-        Animation animationManager;
-       
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
+            penumbra = new PenumbraComponent(this);
+            Components.Add(penumbra);
+
 
             //TODO:Реализовать измениение разрешения 
             _graphics.IsFullScreen = true;
@@ -31,11 +33,7 @@ namespace ninja
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             sceneManager = new();
-
-            camera = new FollowCamera(Vector2.Zero);
         }
-
-        
 
         protected override void Initialize()
         {
@@ -46,7 +44,7 @@ namespace ninja
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            sceneManager.AddScane(new GameScene(Content, sceneManager));
+            sceneManager.AddScane(new GameScene(Content, sceneManager, penumbra));
         }
 
         protected override void Update(GameTime gameTime)
@@ -54,27 +52,25 @@ namespace ninja
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            //camera.Follow(pla)
+            Globals.Update(gameTime);
 
             sceneManager.GetCurrentScene().Update(gameTime);
 
-            //animationManager.Update();
-            
+
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
+            penumbra.BeginDraw();
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
+            
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
             sceneManager.GetCurrentScene().Draw(_spriteBatch);
 
-            //animationManager.Drow(_spriteBatch, spriteSheet);
-
             _spriteBatch.End();
-
+            
             base.Draw(gameTime);
         }
     }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using ninja.Model;
+using Penumbra;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +15,7 @@ namespace ninja
     {
         private ContentManager contentManager;
         private Texture2D texture;
-        public ExitScene(ContentManager contentManager)
+        public ExitScene(ContentManager contentManager, PenumbraComponent penumbra)
         {
             this.contentManager = contentManager;
         }
@@ -32,5 +34,6 @@ namespace ninja
         {
 
         }
+
     }
 }

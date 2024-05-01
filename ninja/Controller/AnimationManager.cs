@@ -11,25 +11,28 @@ namespace ninja
 {
     public class Animation
     {
+        public int SCALE = 1;
+        private readonly Texture2D spriteSheet;
+
         #region prop
-        int frameCount;
-        int columsCount;
-        Vector2 size;
+        private int frameCount;
+        private int columsCount;
+        private Vector2 size;
 
-        int counter;
-        int activeFrame;
-        int interval;
+        private int counter;
+        private int activeFrame;
+        private readonly int interval;
 
-        int rowPos;
-        int colPos;
+        private int rowPos;
+        private int colPos;
         #endregion
 
-        Texture2D spriteSheet;
+        private bool flipHoriz;
 
-        public Vector2 position;
+        public Vector2 position { get; set; }
 
         public Animation
-            (int frameCount, int columsCount, Vector2 size/*, Texture2D spriteSheet*/)
+            (Texture2D runAnim, int frameCount, int columsCount, Vector2 size)
         {
             this.frameCount = frameCount;
             this.columsCount = columsCount;
@@ -37,11 +40,11 @@ namespace ninja
 
             counter = 0;
             activeFrame = 0;
-            interval = 30;
+            interval = 3;
 
             rowPos = 0; colPos = 0;
 
-            //this.spriteSheet = spriteSheet;
+            this.spriteSheet = runAnim;
         }
 
         public virtual void Update()
@@ -78,13 +81,20 @@ namespace ninja
             rowPos = 0;
         }
 
-        public virtual void Drow(SpriteBatch spriteBatch, Texture2D spriteSheet)
+        public virtual void Drow
+            (SpriteBatch spriteBatch, SpriteEffects spriteEffect = SpriteEffects.None)
         {
+
             spriteBatch.Draw(
                 spriteSheet,
                 this.RectPositions,
                 this.GetFrame(),
-                Color.White);
+                Color.White,
+                0,
+                Vector2.One,
+                spriteEffect,
+                0f
+                );
         }
 
         public Rectangle GetFrame()
@@ -93,7 +103,7 @@ namespace ninja
                 colPos * (int)size.X,
                 rowPos * (int)size.Y, 
                 (int)size.X,
-                (int)size.Y
+                (int)size.Y 
                 );
         }
 
@@ -104,8 +114,8 @@ namespace ninja
                 return new Rectangle(
                     (int)position.X,
                     (int)position.Y,
-                    (int)size.X*20,
-                    (int)size.Y*20);
+                    (int)size.X * SCALE,
+                    (int)size.Y * SCALE);
             }
         }
     }
