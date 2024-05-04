@@ -21,7 +21,7 @@ namespace ninja.Model
         public float rotation = 0;
 
         public float speed = 250f;
-        private const int SCALE = 2;
+        private const int SCALE = 1;
         private const int OFFSETX = 50 * SCALE;
         private const int offsetTop = 40 * SCALE;
 

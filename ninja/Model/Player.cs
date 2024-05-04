@@ -15,6 +15,11 @@ namespace ninja.Model
     {
         private readonly Animation runAnimation;
         private readonly Animation idleAnimation;
+        private readonly Animation jumpAnimation;
+        private readonly Animation fallAnimation;
+
+        private Animation currentAmination;
+
         private readonly List<Rectangle> collisionsGroup;
 
         public Vector2 position;
@@ -24,11 +29,14 @@ namespace ninja.Model
         public float rotation = 0;
 
         public float speed = 250f;
-        private const int SCALE = 2;
-        private const int OFFSETX = 50 * SCALE;
-        private const int offsetTop = 40 * SCALE;
+        private const int SCALE = 3;
+        //private const int OFFSETX = 50 * SCALE;
+        //private const int offsetTop = 40 * SCALE;
+        public int OFFSETX = 50 * SCALE;
+        public int offsetTop = 40 * SCALE;
 
-        private bool onGround;
+        //private bool onGround;
+        public bool onGround;
 
         //TODO:GRAVITY на все энтети
         private const float GRAVITY = 1000f;
@@ -39,22 +47,32 @@ namespace ninja.Model
             get 
             { 
                 return new Rectangle(
-                runAnimation.RectPositions.X,
-                runAnimation.RectPositions.Y,
-                runAnimation.RectPositions.Width,
-                runAnimation.RectPositions.Height-3);
+                idleAnimation.RectPositions.X,
+                idleAnimation.RectPositions.Y,
+                idleAnimation.RectPositions.Width,
+                idleAnimation.RectPositions.Height);
             }
         }
-        public Player(Animation runAnim, Animation idleAmin, List<Rectangle> collisionsGroup)
+        public Player(Animation runAnim, Animation idleAmin, 
+            Animation jumpAnim, Animation fallAnim, List<Rectangle> collisionsGroup)
         {
             runAnimation = runAnim;
             idleAnimation = idleAmin;
-            this.collisionsGroup = collisionsGroup;
-            runAnim.position = position;
-            idleAmin.position = position;
+            jumpAnimation = jumpAnim;
+            fallAnimation = fallAnim;
+
+            runAnimation.position = position;
+            idleAnimation.position = position;
+            jumpAnimation.position = position;
+            
             runAnimation.SCALE = SCALE;
             idleAnimation.SCALE = SCALE;
+            jumpAnimation.SCALE = SCALE;
+            fallAnimation.SCALE = SCALE;
 
+            currentAmination = idleAnimation;
+
+            this.collisionsGroup = collisionsGroup;
         }
         private Rectangle CalculateBounds(Vector2 pos)
         {
@@ -74,26 +92,51 @@ namespace ninja.Model
                 rotation = -(float)Math.PI;
                 flip = SpriteEffects.FlipHorizontally;
                 velocity.X = -speed;
+                if (onGround)
+                    currentAmination = runAnimation;
+                else currentAmination = jumpAnimation;
             }
             else if (keyboardState.IsKeyDown(Keys.D))
             {
                 rotation = 0;
                 flip = SpriteEffects.None;
                 velocity.X = speed;
+
+                if (onGround)
+                    currentAmination = runAnimation;
+                else currentAmination = jumpAnimation;
             }
-            else velocity.X = 0;
+            else
+            {
+                velocity.X = 0;
+                if (onGround)
+                    currentAmination = idleAnimation;
+                else currentAmination = jumpAnimation;
+            } 
 
-            velocity.Y += GRAVITY * Globals.Time;
-
-            if (keyboardState.IsKeyDown(Keys.Space) && onGround)
+            if (keyboardState.IsKeyDown(Keys.Space) /*&& onGround*/)
             {
                 velocity.Y = -JUMP;
+                currentAmination = jumpAnimation;
+                onGround = false;
             }
+
+            if (velocity.Y > 0)
+            {
+                currentAmination = fallAnimation;
+            }
+            velocity.Y += GRAVITY * Globals.Time;
+
         }
         private void UpdatePosition()
         {
+            //if(PlayerRectangle.Y > 0)
+            //    начитается баги
+
             onGround = false;
+            
             var newPos = position + velocity * Globals.Time;
+
             var newRect = CalculateBounds(newPos);
 
             foreach (var collider in collisionsGroup)
@@ -116,7 +159,7 @@ namespace ninja.Model
                 {
                     if (velocity.Y > 0)
                     {
-                        newPos.Y = collider.Top - (PlayerRectangle.Height) ;
+                        newPos.Y = collider.Top - PlayerRectangle.Height;
                         onGround = true;
                         velocity.Y = 0;
                     }
@@ -126,6 +169,8 @@ namespace ninja.Model
                         velocity.Y = 0;
                     }
                 }
+                //if (velocity.Y == 0)
+                //    onGround = true;
             }
             position = newPos;
         }
@@ -137,17 +182,20 @@ namespace ninja.Model
 
             runAnimation.position = position;
             idleAnimation.position = position;
+            jumpAnimation.position = position;
+            fallAnimation.position = position;
 
             runAnimation.Update();
             idleAnimation.Update();
+            jumpAnimation.Update();
+            fallAnimation.Update();
+
+            //currentAmination.Update();
         }
 
         public void Drow(SpriteBatch spriteBatch)
         {
-            if (velocity.X == 0)
-                idleAnimation.Drow(spriteBatch, flip);
-            else
-                runAnimation.Drow(spriteBatch, flip);
+            currentAmination.Drow(spriteBatch, flip);
         }
     }
 }

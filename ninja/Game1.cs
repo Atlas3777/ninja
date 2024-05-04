@@ -18,12 +18,14 @@ namespace ninja
         private SceneManager sceneManager;
         private PenumbraComponent penumbra;
 
+        GameScene gameScene;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
             penumbra = new PenumbraComponent(this);
             Components.Add(penumbra);
-
+            
 
             //TODO:Реализовать измениение разрешения 
             _graphics.IsFullScreen = true;
@@ -44,7 +46,12 @@ namespace ninja
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
+
+            Globals.Content = Content;
+            Globals.GraphicsDevice = GraphicsDevice;
+            
             sceneManager.AddScane(new GameScene(Content, sceneManager, penumbra));
+            
         }
 
         protected override void Update(GameTime gameTime)
@@ -56,20 +63,12 @@ namespace ninja
 
             sceneManager.GetCurrentScene().Update(gameTime);
 
-
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            penumbra.BeginDraw();
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-            
-            _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-
             sceneManager.GetCurrentScene().Draw(_spriteBatch);
-
-            _spriteBatch.End();
             
             base.Draw(gameTime);
         }

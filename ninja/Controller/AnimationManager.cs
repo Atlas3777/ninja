@@ -27,12 +27,11 @@ namespace ninja
         private int colPos;
         #endregion
 
-        private bool flipHoriz;
 
         public Vector2 position { get; set; }
 
         public Animation
-            (Texture2D runAnim, int frameCount, int columsCount, Vector2 size)
+            (Texture2D animation, int frameCount, int columsCount, Vector2 size, int interval = 3)
         {
             this.frameCount = frameCount;
             this.columsCount = columsCount;
@@ -40,11 +39,11 @@ namespace ninja
 
             counter = 0;
             activeFrame = 0;
-            interval = 3;
+            this.interval = interval;
 
             rowPos = 0; colPos = 0;
 
-            this.spriteSheet = runAnim;
+            this.spriteSheet = animation;
         }
 
         public virtual void Update()
