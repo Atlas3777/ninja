@@ -46,9 +46,9 @@ namespace ninja
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-
             Globals.Content = Content;
             Globals.GraphicsDevice = GraphicsDevice;
+            Globals.SpriteBatch = _spriteBatch;
             
             sceneManager.AddScane(new GameScene(Content, sceneManager, penumbra));
             

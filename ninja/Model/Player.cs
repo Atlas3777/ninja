@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ninja.Controller;
+using ninja.Scenes;
 using Penumbra;
 using System;
 using System.Collections.Generic;
@@ -28,8 +29,8 @@ namespace ninja.Model
 
         public float rotation = 0;
 
-        public float speed = 250f;
-        private const int SCALE = 3;
+        public float speed = 500f;
+        private const int SCALE = 2;
         //private const int OFFSETX = 50 * SCALE;
         //private const int offsetTop = 40 * SCALE;
         public int OFFSETX = 50 * SCALE;
@@ -42,6 +43,8 @@ namespace ninja.Model
         private const float GRAVITY = 1000f;
         private const float JUMP = 800f;
 
+
+        Map map;
         public Rectangle PlayerRectangle
         {
             get 
@@ -54,8 +57,10 @@ namespace ninja.Model
             }
         }
         public Player(Animation runAnim, Animation idleAmin, 
-            Animation jumpAnim, Animation fallAnim, List<Rectangle> collisionsGroup)
+            Animation jumpAnim, Animation fallAnim, Map map/*List<Rectangle> collisionsGroup*/)
         {
+
+            position = new Vector2(280,-90);
             runAnimation = runAnim;
             idleAnimation = idleAmin;
             jumpAnimation = jumpAnim;
@@ -64,17 +69,17 @@ namespace ninja.Model
             runAnimation.position = position;
             idleAnimation.position = position;
             jumpAnimation.position = position;
-            
+
             runAnimation.SCALE = SCALE;
             idleAnimation.SCALE = SCALE;
             jumpAnimation.SCALE = SCALE;
             fallAnimation.SCALE = SCALE;
 
             currentAmination = idleAnimation;
-
+            this.map = map;
             this.collisionsGroup = collisionsGroup;
         }
-        private Rectangle CalculateBounds(Vector2 pos)
+        /*private*/public Rectangle CalculateBounds(Vector2 pos)
         {
             return new Rectangle(
                 (int)pos.X + OFFSETX,
@@ -114,7 +119,7 @@ namespace ninja.Model
                 else currentAmination = jumpAnimation;
             } 
 
-            if (keyboardState.IsKeyDown(Keys.Space) /*&& onGround*/)
+            if (keyboardState.IsKeyDown(Keys.Space) && onGround)
             {
                 velocity.Y = -JUMP;
                 currentAmination = jumpAnimation;
@@ -134,12 +139,10 @@ namespace ninja.Model
             //    начитается баги
 
             onGround = false;
-            
             var newPos = position + velocity * Globals.Time;
-
             var newRect = CalculateBounds(newPos);
 
-            foreach (var collider in collisionsGroup)
+            foreach (var collider in map.UpdatingCpllisions(newRect))
             {
                 if (newPos.X != position.X)
                 {
@@ -154,10 +157,10 @@ namespace ninja.Model
                     }
                 }
 
-                newRect = CalculateBounds(new(position.X, newPos.Y));
+                newRect = CalculateBounds(new Vector2(position.X, newPos.Y));
                 if (newRect.Intersects(collider))
                 {
-                    if (velocity.Y > 0)
+                    if (velocity.Y >= 0)
                     {
                         newPos.Y = collider.Top - PlayerRectangle.Height;
                         onGround = true;
@@ -169,8 +172,6 @@ namespace ninja.Model
                         velocity.Y = 0;
                     }
                 }
-                //if (velocity.Y == 0)
-                //    onGround = true;
             }
             position = newPos;
         }

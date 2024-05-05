@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ninja.Extensions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,83 +20,118 @@ namespace ninja.Scenes
         private List<Rectangle> textureTileList;
         private Texture2D textureAtlas;
         private Dictionary<Vector2, int> tilemap;
-        private int scaleTM = 119;
+        public readonly int scaleTM = 40;
+        public Vector2 mapSize;
+        private int inversion = -1;
+        private List<Rectangle> collisionsRectangle;
 
 
         private PenumbraComponent penumbra;
         public Spotlight spotlight;
-        public PointLight PointLight;
+        public Spotlight spotlight2;
+        public Spotlight spotlight3;
+        public Spotlight spotlightInHouse;
+        public PointLight pointLight;
+        public PointLight pointLightInHouse;
         public Light light;
 
         public Map(PenumbraComponent penumbraComponent)
         {
             penumbra = penumbraComponent;
+            collisionsRectangle = new List<Rectangle>();
+
+            tilemap = LoadMap("../../../Data/map.csv");
+            textureTileList = new()
+            {
+                new Rectangle(0,0,8,8),
+                new Rectangle(0,8,8,8),
+                new Rectangle(0,16,8,8),
+                new Rectangle(24,0,8,8),
+                new Rectangle(0,16,8,8),
+                new Rectangle(32,0,8,8),
+                new Rectangle(40,0,8,8)
+            };
+            InitializeHull();
         }
 
-        public void InitializePlayer(Player player)
+        public void Initialize(Player player)
         {
             this.player = player;
         }
-
-        
 
         public void Load(ContentManager contentManager)
         {
             textureAtlas = contentManager.Load<Texture2D>("atlas");
 
             spotlight = new Spotlight();
-            spotlight.ShadowType = ShadowType.Occluded;
-            spotlight.Position = new Vector2(1000, 200);
-            spotlight.Scale = new Vector2(600, 600);
-            spotlight.Radius = 0;
-            spotlight.Color = Color.Gainsboro;
-            spotlight.ConeDecay = 1f;
-            spotlight.Position = new Vector2(300, 400);
-
-
-            light = new PointLight();
-            light.Position = new Vector2(300, 1000);
-            light.Radius = 100;
-            light.Scale = new Vector2(200, 200);
-            light.Color = new Color(100, 100, 100);
-
-
-            PointLight = new PointLight();
-            PointLight.Scale = new Vector2(3000, 3000);
-            PointLight.Position = new Vector2(1000, 100);
-            PointLight.ShadowType = ShadowType.Solid;
-
-            penumbra.Lights.Add(PointLight);
+            spotlight.Position = new Vector2(500, 1200 * inversion);
+            spotlight.Scale = new Vector2(2000, 1600);
+            spotlight.Rotation = (float)Math.PI / 2;
             penumbra.Lights.Add(spotlight);
-            penumbra.Lights.Add(light);
 
-            penumbra.AmbientColor = new Color(20,20,20);
-        }
+            spotlight2 = new Spotlight();
+            spotlight2.Position = new Vector2(1200, 1200 * inversion);
+            spotlight2.Scale = new Vector2(2000, 1600);
+            spotlight2.Rotation = (float)Math.PI / 2;
+            spotlight2.Enabled = false;
+            penumbra.Lights.Add(spotlight2);
 
-        public void InicialiseMap()
-        {
-            tilemap = LoadMap("../../../Data/map.csv");
-            textureTileList = new()
+            spotlight3 = new Spotlight();
+            spotlight3.Position = new Vector2(1900, 1200 * inversion);
+            spotlight3.Scale = new Vector2(2000, 1600);
+            spotlight3.Rotation = (float)Math.PI / 2;
+            spotlight3.Enabled = false;
+            penumbra.Lights.Add(spotlight3);
+
+
+            spotlightInHouse = new Spotlight();
+            spotlightInHouse.Position = new Vector2(1000 + 6*scaleTM, 160 * inversion);
+            spotlightInHouse.Scale = new(1000, 2500);
+            spotlightInHouse.Enabled = false;
+            spotlightInHouse.Rotation = (float)Math.PI / 2;
+            //pointLight.Radius = 2f;
+            spotlightInHouse.ShadowType = ShadowType.Occluded;
+            penumbra.Lights.Add(spotlightInHouse);
+
+           
+
+            //penumbra.AmbientColor = Color.Black;
+            penumbra.AmbientColor = new Color(10,10,10);
+
+
+            foreach (var texture in tilemap)
             {
-                new Rectangle(0,0,8,8),
-                new Rectangle(0,8,8,8),
-                new Rectangle(0,16,8,8)
-            };
-            InitializeHull();
+                var x = (int)texture.Key.X * scaleTM;
+                var y = (int)texture.Key.Y * scaleTM * inversion;
+
+                if (texture.Value == 20)
+                {
+                    var newLight = new Spotlight();
+                    newLight.Position = new Vector2(x,y);
+                    newLight.Scale = new(1000, 2500);
+                    newLight.Enabled = true;
+                    newLight.Rotation = (float)Math.PI / 2;
+                    penumbra.Lights.Add(newLight);
+                    continue;
+                }
+            }
+            
+
         }
+
 
         private void InitializeHull()
         {
             foreach (var texture in tilemap)
             {
+                if (texture.Value > 8)
+                    continue;
                 var x = (int)texture.Key.X * scaleTM;
-                var y = (int)texture.Key.Y * scaleTM;
+                var y = (int)texture.Key.Y * scaleTM * inversion;
 
                 var hull = new Hull();
                 foreach (var pos in GetPositionСorner(x, y))
-                {
                     hull.Points.Add(pos);
-                }
                 penumbra.Hulls.Add(hull);
             }
         }
@@ -103,34 +139,36 @@ namespace ninja.Scenes
         private float speedRot = 0.01f;
         public void Update()
         {
-            //spotlight.Rotation += speedRot;
+            if (player.position.X > 900)
+            {
+                spotlightInHouse.Enabled = true;
+                
+            }
+            if (player.position.X > 700)
+            {
+                spotlight2.Enabled = true;
 
-            //if (spotlight.Rotation >= Math.PI || spotlight.Rotation <= 0)
-            //{
-            //    spotlight.Rotation = 0;
-            //    speedRot = -speedRot;
-            //}
-            //spotlight.Position = player.position + new Vector2(110, 100);
-
-            //spotlight.Rotation = player.rotation;
-
-            //light.Position = player.position + new Vector2(110, 100);
+            }
+            if (player.position.X < 900 || player.position.X > 1400)
+                spotlightInHouse.Enabled = false;
+            if(player.position.X > 1200)
+                spotlight3.Enabled = true;
         }
 
-        public void GetLight()
-        {
 
-        }
+        
         public void Drow(SpriteBatch spriteBatch)
         {
             foreach (var texture in tilemap)
             {
+                if (texture.Value > 8)
+                    continue;
+                var x = (int)texture.Key.X * scaleTM;
+                var y = (int)texture.Key.Y * scaleTM * inversion;
+                
                 var rectanglePositonInMap = new Rectangle(
-                    (int)texture.Key.X * scaleTM,
-                    (int)texture.Key.Y * scaleTM,
-                    scaleTM,
-                    scaleTM
-                    );
+                    x,y,scaleTM,scaleTM);
+
                 var positionTextureInAtlas = textureTileList[texture.Value - 1];
                 spriteBatch.Draw(textureAtlas, rectanglePositonInMap, positionTextureInAtlas, Color.White);
             }
@@ -138,30 +176,50 @@ namespace ninja.Scenes
 
         public List<Rectangle> GetCollisionRect()
         {
-            var colGroup = new List<Rectangle>();
             foreach (var texture in tilemap)
             {
-                if (texture.Value != 0)
-                {
-                    var x = (int)texture.Key.X * scaleTM;
-                    var y = (int)texture.Key.Y * scaleTM;
+                if (texture.Value > 8)
+                    continue;
 
-                    var rectanglePositonInMap = 
-                        new Rectangle(x,y,scaleTM,scaleTM);
+                var x = (int)texture.Key.X * scaleTM;
+                var y = (int)texture.Key.Y * scaleTM * inversion;
 
-                    colGroup.Add(rectanglePositonInMap);
-                }
+                var rectanglePositonInMap =
+                    new Rectangle(x, y, scaleTM, scaleTM);
+
+                collisionsRectangle.Add(rectanglePositonInMap);
+
             }
-            return colGroup;
+            return collisionsRectangle;
+        }
+
+        public List<Rectangle> UpdatingCpllisions(Rectangle bounds)
+        {
+            var answer = new List<Rectangle>();
+
+            var leftX = (int)Math.Floor((float)bounds.Left/ scaleTM);
+            var rightTileX = (int)Math.Ceiling((float)bounds.Right / scaleTM);
+            var topTileY = (int)Math.Floor((float)bounds.Top / scaleTM);
+            var bottomTileY = (int)Math.Ceiling((float)bounds.Bottom / scaleTM);
+
+            foreach(var tile in collisionsRectangle)
+            {
+                if(tile.Top/scaleTM >= topTileY && tile.Bottom/scaleTM <= bottomTileY)
+                    if(tile.Left / scaleTM >= leftX && tile.Right/scaleTM <= rightTileX)
+                        answer.Add(tile);
+            }
+
+            return answer;
         }
 
         private List<Vector2> GetPositionСorner(int x, int y)
         {
             var list = new List<Vector2>();
             list.Add(new Vector2(x, y));
-            list.Add(new Vector2(x+scaleTM, y));
+            list.Add(new Vector2(x + scaleTM, y));
             list.Add(new Vector2(x + scaleTM, y + scaleTM));
             list.Add(new Vector2(x, y + scaleTM));
+            list.Select(x=>x.Y * inversion);
             return list;
         }
 
@@ -172,12 +230,15 @@ namespace ninja.Scenes
             var reader = new StreamReader(filepath);
 
             int y = 0;
+            int xSize = 0; 
             string line;
+            
 
             while ((line = reader.ReadLine()) != null)
             {
                 var items = line.Split(';');
-
+                xSize = Math.Max(items.Length, xSize);
+                
                 for (int x = 0; x < items.Length; x++)
                 {
                     if (int.TryParse(items[x], out int value))
@@ -190,6 +251,8 @@ namespace ninja.Scenes
                 }
                 y++;
             }
+
+            mapSize = new Vector2(xSize, y);
             return result;
         }
     }
