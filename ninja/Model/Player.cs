@@ -30,22 +30,23 @@ namespace ninja.Model
         public float rotation = 0;
 
         public float speed = 500f;
-        private const int SCALE = 2;
-        //private const int OFFSETX = 50 * SCALE;
-        //private const int offsetTop = 40 * SCALE;
-        public int OFFSETX = 50 * SCALE;
-        public int offsetTop = 40 * SCALE;
+        private const int SCALE = 3;
+        private const int OFFSETX = 50 * SCALE;
+        private const int offsetTop = 40 * SCALE;
 
         //private bool onGround;
         public bool onGround;
 
         //TODO:GRAVITY на все энтети
         private const float GRAVITY = 1000f;
-        private const float JUMP = 800f;
+        private const float JUMP = 400f;
+        public float jumpForse = JUMP;
 
-
+        KeyboardState PrewKeyboardState;
         Map map;
-        public Rectangle PlayerRectangle
+        public Rectangle bounds;
+
+        public Rectangle RectangleForDrow
         {
             get 
             { 
@@ -57,10 +58,10 @@ namespace ninja.Model
             }
         }
         public Player(Animation runAnim, Animation idleAmin, 
-            Animation jumpAnim, Animation fallAnim, Map map/*List<Rectangle> collisionsGroup*/)
+            Animation jumpAnim, Animation fallAnim, Map map)
         {
 
-            position = new Vector2(280,-90);
+            position = new Vector2(280,-900);
             runAnimation = runAnim;
             idleAnimation = idleAmin;
             jumpAnimation = jumpAnim;
@@ -78,59 +79,9 @@ namespace ninja.Model
             currentAmination = idleAnimation;
             this.map = map;
             this.collisionsGroup = collisionsGroup;
-        }
-        /*private*/public Rectangle CalculateBounds(Vector2 pos)
-        {
-            return new Rectangle(
-                (int)pos.X + OFFSETX,
-                (int)pos.Y + offsetTop,
-                PlayerRectangle.Width - (2 * OFFSETX),
-                PlayerRectangle.Height - offsetTop);
-        }
+            bounds = CalculateBounds(RectangleForDrow, position, OFFSETX, offsetTop);
 
-        private void UpdateVelocity()
-        {
-            var keyboardState = Keyboard.GetState();
-
-            if (keyboardState.IsKeyDown(Keys.A))
-            {
-                rotation = -(float)Math.PI;
-                flip = SpriteEffects.FlipHorizontally;
-                velocity.X = -speed;
-                if (onGround)
-                    currentAmination = runAnimation;
-                else currentAmination = jumpAnimation;
-            }
-            else if (keyboardState.IsKeyDown(Keys.D))
-            {
-                rotation = 0;
-                flip = SpriteEffects.None;
-                velocity.X = speed;
-
-                if (onGround)
-                    currentAmination = runAnimation;
-                else currentAmination = jumpAnimation;
-            }
-            else
-            {
-                velocity.X = 0;
-                if (onGround)
-                    currentAmination = idleAnimation;
-                else currentAmination = jumpAnimation;
-            } 
-
-            if (keyboardState.IsKeyDown(Keys.Space) && onGround)
-            {
-                velocity.Y = -JUMP;
-                currentAmination = jumpAnimation;
-                onGround = false;
-            }
-
-            if (velocity.Y > 0)
-            {
-                currentAmination = fallAnimation;
-            }
-            velocity.Y += GRAVITY * Globals.Time;
+            
 
         }
         private void UpdatePosition()
@@ -139,36 +90,37 @@ namespace ninja.Model
             //    начитается баги
 
             onGround = false;
-            var newPos = position + velocity * Globals.Time;
-            var newRect = CalculateBounds(newPos);
+            var newPos = position + velocity * Globals.Time; // теоритическая новая позиция(можем зайти в стену)
 
-            foreach (var collider in map.UpdatingCpllisions(newRect))
+            var newRect = CalculateBounds(RectangleForDrow, newPos, OFFSETX, offsetTop); // у игрока есть Прямоугольник, тут мы расчитываем его положение в новой позиции
+
+            foreach (var collider in map.UpdatingCpllisions(newRect)) //тут пробегаемся по ближайшим каллайдерам
             {
-                if (newPos.X != position.X)
+                if (newPos.X != position.X) // если мы не стоим на месте
                 {
-                    newRect = CalculateBounds(new(newPos.X, position.Y));
-                    if (newRect.Intersects(collider))
+                    newRect = CalculateBounds(RectangleForDrow, new(newPos.X, position.Y), OFFSETX, offsetTop); // это граница по вертикали
+                    if (newRect.Intersects(collider))// если мы перелеклись с одним из ближайших коллайдеров по x
                     {
-                        if (newPos.X > position.X)
-                            newPos.X = collider.Left - PlayerRectangle.Width + OFFSETX;
+                        if (newPos.X > position.X) // если двигались вправо
+                            newPos.X = collider.Left - RectangleForDrow.Width + OFFSETX; // мы остаемся у левого края колизии  
                         else
-                            newPos.X = collider.Right - OFFSETX;
+                            newPos.X = collider.Right - OFFSETX; // остаемся у правого края
                         continue;
                     }
                 }
 
-                newRect = CalculateBounds(new Vector2(position.X, newPos.Y));
-                if (newRect.Intersects(collider))
+                newRect = CalculateBounds(RectangleForDrow, new Vector2(position.X, newPos.Y), OFFSETX, offsetTop); // то же самое по Y
+                if (newRect.Intersects(collider))// пересечение
                 {
-                    if (velocity.Y >= 0)
+                    if (velocity.Y >= 0) // если падаем
                     {
-                        newPos.Y = collider.Top - PlayerRectangle.Height;
+                        newPos.Y = collider.Top - RectangleForDrow.Height; // появляяемся сверху коллайдера
                         onGround = true;
                         velocity.Y = 0;
                     }
-                    else
+                    else // если прыгали и врезались
                     {
-                        newPos.Y = collider.Bottom - offsetTop;
+                        newPos.Y = collider.Bottom - offsetTop; // появляяемся снизу коллайдера
                         velocity.Y = 0;
                     }
                 }
@@ -176,10 +128,89 @@ namespace ninja.Model
             position = newPos;
         }
 
+
+
+        private void UpdateVelocity()
+        {
+            var keyboardState = Keyboard.GetState();
+
+            if (keyboardState.IsKeyDown(Keys.A))
+            {
+                flip = SpriteEffects.FlipHorizontally;
+                velocity.X = -speed;
+            }
+            else if (keyboardState.IsKeyDown(Keys.D))
+            {
+                flip = SpriteEffects.None;
+                velocity.X = speed;
+            }
+            else
+            {
+                velocity.X = 0;
+            }
+            
+
+            if (keyboardState.IsKeyDown(Keys.Space) && onGround)
+            {
+                jumpForse += 15f;
+                jumpForse = MathHelper.Clamp(jumpForse, JUMP, 800);
+            }
+
+            if(keyboardState.IsKeyUp(Keys.Space) && PrewKeyboardState.IsKeyDown(Keys.Space) && onGround)
+            {
+                MakeJump();
+                jumpForse = JUMP;
+            }
+
+            PrewKeyboardState = keyboardState;
+
+            velocity.Y += GRAVITY * Globals.Time;
+        }
+
+        private void UpdateCurrentAnim()
+        {
+            if (velocity.X == 0 && onGround)
+            {
+                currentAmination = idleAnimation;
+                return;
+            }
+
+            if (velocity.X > 0 && onGround)
+            {
+                currentAmination = runAnimation;
+                return;
+            }
+                
+            if (velocity.X < 0 && onGround)
+            {
+                currentAmination = runAnimation;
+                return;
+            }
+
+            if (velocity.Y > 0 && !onGround)
+            {
+                currentAmination = fallAnimation;
+                return;
+            }
+
+            if (velocity.Y < 0 && !onGround)
+            {
+                currentAmination = jumpAnimation;
+                return;
+            }
+        }
+        
+        private void MakeJump()
+        {
+            velocity.Y = -jumpForse;
+        }
+
         public override void Update()
         {
             UpdateVelocity();
+            UpdateCurrentAnim();
             UpdatePosition();
+            
 
             runAnimation.position = position;
             idleAnimation.position = position;
@@ -191,12 +222,12 @@ namespace ninja.Model
             jumpAnimation.Update();
             fallAnimation.Update();
 
-            //currentAmination.Update();
+            bounds = CalculateBounds(RectangleForDrow, position, OFFSETX, offsetTop);
         }
 
-        public void Drow(SpriteBatch spriteBatch)
+        public void Drow(SpriteBatch spriteBatch, int layer = 0)
         {
-            currentAmination.Drow(spriteBatch, flip);
+            currentAmination.Drow(spriteBatch, flip, layer);
         }
     }
 }

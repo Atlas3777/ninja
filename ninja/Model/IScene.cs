@@ -6,8 +6,9 @@ namespace ninja
 {
     public interface IScene
     {
+        public void Initialize();
         public void Load();
         public void Update(GameTime gameTame);
-        public void Draw(SpriteBatch spriteBatch);
+        public void Draw(SpriteBatch spriteBatch, GameTime gameTime);
     }
 }

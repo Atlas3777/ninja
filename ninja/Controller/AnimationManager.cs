@@ -81,7 +81,7 @@ namespace ninja
         }
 
         public virtual void Drow
-            (SpriteBatch spriteBatch, SpriteEffects spriteEffect = SpriteEffects.None)
+            (SpriteBatch spriteBatch, SpriteEffects spriteEffect = SpriteEffects.None, int layer = 0)
         {
 
             spriteBatch.Draw(
@@ -92,7 +92,7 @@ namespace ninja
                 0,
                 Vector2.One,
                 spriteEffect,
-                0f
+                layer
                 );
         }
 

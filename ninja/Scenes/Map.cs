@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ninja.Extensions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,6 +15,8 @@ namespace ninja.Scenes
     internal class Map
     {
         Player player;
+        Texture2D background;
+        Texture2D stolb;
 
         private List<Rectangle> textureTileList;
         private Texture2D textureAtlas;
@@ -27,6 +28,7 @@ namespace ninja.Scenes
 
 
         private PenumbraComponent penumbra;
+
         public Spotlight spotlight;
         public Spotlight spotlight2;
         public Spotlight spotlight3;
@@ -43,9 +45,9 @@ namespace ninja.Scenes
             tilemap = LoadMap("../../../Data/map.csv");
             textureTileList = new()
             {
-                new Rectangle(0,0,8,8),
-                new Rectangle(0,8,8,8),
-                new Rectangle(0,16,8,8),
+                new Rectangle(0,0,40,40),
+                new Rectangle(40,0,40,40),
+                new Rectangle(0,0,1,1),
                 new Rectangle(24,0,8,8),
                 new Rectangle(0,16,8,8),
                 new Rectangle(32,0,8,8),
@@ -56,12 +58,15 @@ namespace ninja.Scenes
 
         public void Initialize(Player player)
         {
+            collisionsRectangle = GetCollisionRect();
             this.player = player;
         }
 
         public void Load(ContentManager contentManager)
         {
             textureAtlas = contentManager.Load<Texture2D>("atlas");
+            background = contentManager.Load<Texture2D>("Background/fonPh4");
+            stolb = contentManager.Load<Texture2D>("Decor/Stolb");
 
             spotlight = new Spotlight();
             spotlight.Position = new Vector2(500, 1200 * inversion);
@@ -84,19 +89,32 @@ namespace ninja.Scenes
             penumbra.Lights.Add(spotlight3);
 
 
+            
             spotlightInHouse = new Spotlight();
             spotlightInHouse.Position = new Vector2(1000 + 6*scaleTM, 160 * inversion);
             spotlightInHouse.Scale = new(1000, 2500);
             spotlightInHouse.Enabled = false;
             spotlightInHouse.Rotation = (float)Math.PI / 2;
-            //pointLight.Radius = 2f;
+            //spotlightInHouse.Radius = 100f;
             spotlightInHouse.ShadowType = ShadowType.Occluded;
-            penumbra.Lights.Add(spotlightInHouse);
+            spotlightInHouse.Color = new Color(150, 150, 150);
+            //penumbra.Lights.Add(spotlightInHouse);
 
+            pointLight = new PointLight();
+            pointLight.Position = spotlightInHouse.Position;
+            pointLight.Scale = spotlightInHouse.Scale/2;
+            pointLight.ShadowType = ShadowType.Occluded;
+            pointLight.Enabled = false;
            
+            
+            //pointLight.CastsShadows = true;
+            //penumbra.Lights.Add(pointLight);
+
 
             //penumbra.AmbientColor = Color.Black;
             penumbra.AmbientColor = new Color(10,10,10);
+            //penumbra.AmbientColor = new Color(100,100,100);
+            //penumbra.AmbientColor = Color.White;
 
 
             foreach (var texture in tilemap)
@@ -115,8 +133,6 @@ namespace ninja.Scenes
                     continue;
                 }
             }
-            
-
         }
 
 
@@ -136,29 +152,43 @@ namespace ninja.Scenes
             }
         }
 
-        private float speedRot = 0.01f;
         public void Update()
         {
             if (player.position.X > 900)
             {
                 spotlightInHouse.Enabled = true;
-                
+                pointLight.Enabled = true;
             }
             if (player.position.X > 700)
             {
                 spotlight2.Enabled = true;
-
             }
             if (player.position.X < 900 || player.position.X > 1400)
+            {
                 spotlightInHouse.Enabled = false;
+                pointLight.Enabled = false;
+            }
+                
             if(player.position.X > 1200)
                 spotlight3.Enabled = true;
         }
 
 
         
-        public void Drow(SpriteBatch spriteBatch)
+        public void Drow(SpriteBatch spriteBatch, int layer = 0)
         {
+            spriteBatch.Draw(
+                stolb,
+                new Rectangle(200, -360 , 120, 360),
+                null,
+                Color.White);
+            spriteBatch.Draw(
+                stolb,
+                new Rectangle(1700, -360, 120, 360),
+                null,
+                Color.White);
+
+
             foreach (var texture in tilemap)
             {
                 if (texture.Value > 8)
@@ -170,7 +200,7 @@ namespace ninja.Scenes
                     x,y,scaleTM,scaleTM);
 
                 var positionTextureInAtlas = textureTileList[texture.Value - 1];
-                spriteBatch.Draw(textureAtlas, rectanglePositonInMap, positionTextureInAtlas, Color.White);
+                spriteBatch.Draw(textureAtlas, rectanglePositonInMap, positionTextureInAtlas, Color.White, 0,Vector2.Zero, 0, layer);
             }
         }
 

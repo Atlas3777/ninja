@@ -39,6 +39,7 @@ namespace ninja
 
         protected override void Initialize()
         {
+            penumbra.Initialize();
             base.Initialize();    
         }
 
@@ -68,9 +69,9 @@ namespace ninja
 
         protected override void Draw(GameTime gameTime)
         {
-            sceneManager.GetCurrentScene().Draw(_spriteBatch);
+            sceneManager.GetCurrentScene().Draw(_spriteBatch, gameTime);
             
-            base.Draw(gameTime);
+            //base.Draw(gameTime);
         }
     }
 }

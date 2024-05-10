@@ -15,14 +15,20 @@ namespace ninja
     {
         private ContentManager contentManager;
         private Texture2D texture;
+
         public ExitScene(ContentManager contentManager, PenumbraComponent penumbra)
         {
             this.contentManager = contentManager;
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             
+        }
+
+        public void Initialize()
+        {
+
         }
 
         public void Load()
