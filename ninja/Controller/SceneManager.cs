@@ -1,34 +1,28 @@
-﻿using ninja.Model;
-using System;
+﻿using ninja.Controller.Scenes;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ninja.Controller
 {
-    internal class SceneManager
+    public static class SceneManager
     {
-        private readonly Stack<IScene> sceneStack;
+        public static Scene CurrentScene;
+        public static Dictionary<string,Scene> Scenes = new();
+        private static MainMenuScene mainMenuScene;
+        private static GameScene gameScene;
 
-        public SceneManager()
-        {
-            sceneStack = new();
-        }
 
-        public void AddScane(IScene scene)
+        public static void Initialize()
         {
-            scene.Load();
-            sceneStack.Push(scene);
-        }
-        public void RemoveScene()
-        {
-            sceneStack.Pop();
-        }
-        public IScene GetCurrentScene()
-        {
-            return sceneStack.Peek();
+            mainMenuScene = new MainMenuScene();
+            gameScene = new GameScene();
+
+            Scenes.Add("MainMenuScene", mainMenuScene);
+            Scenes.Add("GameScene", gameScene);
         }
 
+        public static void ChengeScene(string sceneName)
+        {
+            CurrentScene = Scenes[sceneName];
+        }
     }
 }

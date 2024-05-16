@@ -1,14 +1,18 @@
 ﻿using Microsoft.Xna.Framework;
 using ninja.Extensions;
+using ninja.Model.BotFields;
 using System;
 using System.Collections.Generic;
 
 namespace ninja.Model
 {
-    public class Player
+    public class Bot
     {
-        public int HP;
+        public Route Route;
 
+        public BotStateMachine stateMachine;
+
+        #region physicsProp
         public Vector2 Position
         {
             get { return position; }
@@ -52,8 +56,8 @@ namespace ninja.Model
 
         private Rectangle localBounds;
 
-        public int OffsetX = 50; 
-        public int OffsetY = 36; 
+        public int OffsetX = 50 * 0;
+        public int OffsetY = 37 * 0;
         public Rectangle BoundingRectangle
         {
             get
@@ -65,15 +69,30 @@ namespace ninja.Model
             }
         }
         private List<Rectangle> collisions;
+        #endregion
+
+        public Rectangle FieldOfView;
 
 
-        public Player(Vector2 position, List<Rectangle> collisions, Rectangle localBounds, int offsetX, int offsetY)
+        //private Rectangle UpdateState(Player player)
+        //{
+        //    var target = player.BoundingRectangle.Center;
+        //    return target;
+        //}
+
+        
+
+
+        #region physicsMethod
+        public Bot(List<Rectangle> collisions, Rectangle localBounds)
         {
-            this.position = position;
+            this.stateMachine = new BotStateMachine(this);
+            
+            stateMachine.CurrentState = stateMachine.BotStates["Patrolling"];
+            Route = new Route(this);
             this.collisions = collisions;
             this.localBounds = localBounds;
-            //OffsetX = offsetX;
-            //OffsetY = offsetY;
+
         }
 
         public Rectangle CalculateCollision(Rectangle rectangle)
@@ -97,7 +116,7 @@ namespace ninja.Model
                 velocity.X *= GroundDragFactor;
             else
                 velocity.X *= AirDragFactor;
-       
+
             velocity.X = MathHelper.Clamp(velocity.X, -MaxMoveSpeed, MaxMoveSpeed);
 
             Position += velocity * elapsed;
@@ -117,7 +136,7 @@ namespace ninja.Model
             if (isJumping)
             {
                 if ((!wasJumping && IsOnGround) || jumpTime > 0.0f)
-                { 
+                {
                     jumpTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
                 }
 
@@ -147,7 +166,7 @@ namespace ninja.Model
 
             isOnGround = false;
 
-            foreach(var tileBounds in collisions)
+            foreach (var tileBounds in collisions)
             {
                 Vector2 depth = RectangleExtensions.GetIntersectionDepth(bounds, tileBounds);
                 if (depth != Vector2.Zero)
@@ -165,7 +184,6 @@ namespace ninja.Model
                     }
                     else
                     {
-
                         position = new Vector2(position.X + depth.X, position.Y);
 
                         bounds = BoundingRectangle;
@@ -175,6 +193,6 @@ namespace ninja.Model
 
             previousBottom = bounds.Bottom;
         }
-
+        #endregion
     }
 }
