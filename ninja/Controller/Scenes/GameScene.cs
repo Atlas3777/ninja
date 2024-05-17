@@ -44,6 +44,10 @@ namespace ninja.Controller.Scenes
             {
                 EntryPoint.game.Renderer.player.currentAnimation = EntryPoint.game.Renderer.player.deadAnimation;
             }
+            if (player.Position.Y > 1500)
+            {
+                PlayerController.Player.Position = new(500, 600);
+            }
 
             if (PlayerController.Player.BoundingRectangle.Intersects(BotController.Bots[1].BoundingRectangle))
             {

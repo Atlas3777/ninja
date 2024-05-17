@@ -165,7 +165,7 @@ namespace ninja.Model
         {
             if (isJumping)
             {
-                if ((!wasJumping/* && IsOnGround*/) || jumpTime > 0.0f)
+                if ((!wasJumping && IsOnGround) || jumpTime > 0.0f)
                 { 
                     jumpTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
                 }
