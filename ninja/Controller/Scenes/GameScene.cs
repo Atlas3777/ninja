@@ -52,9 +52,9 @@ namespace ninja.Controller.Scenes
 
             if (PlayerController.Player.BoundingRectangle.Intersects(new Rectangle(0, 400, 100, 100)))
             {
-                player.MaxJumpTime = 2;
-                player.JumpControlPower = -2f;
-                player.JumpLaunchVelocity = -4000f;
+                player.MaxJumpTime = 0.8f;
+                player.JumpControlPower = 0.40f;
+                player.JumpLaunchVelocity = -2500f;
             }
 ;
 
