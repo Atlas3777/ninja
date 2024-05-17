@@ -66,7 +66,7 @@ namespace ninja.Controller.Scenes
 
 
 
-            EntryPoint.game.Renderer.text.Text = $"{PlayerController.Player.HP} \n {BotController.Bots[0].Position} + \n {BotController.Bots[0].HP}";
+            EntryPoint.game.Renderer.text.Text = "Click   R    for    respawn";
 
             BotController.Update(gameTime);
             player.ResetToNext();
