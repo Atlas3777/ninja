@@ -1,46 +1,48 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using static ninja.View.Enums.FaceDirect;
 
 namespace ninja.View.ObjectRender
 {
     public class PlayerV
     {
-        //public SpriteV Sprite;
-
         public Animation runAnimation;
         public Animation idleAnimation;
         public Animation jumpAnimation;
+        public Animation deadAnimation;
+        public Animation attackAnimation;
 
         public Animation currentAnimation;
 
         public Vector2 position;
 
-        public enum FaceDirection
-        {
-            Left = 1,
-            Right = -1,
-        }
         public FaceDirection direction = FaceDirection.Right;
 
 
-        public PlayerV(Animation runAnimation, Animation idleAnimation, Animation jumpAnimation)
+        public PlayerV(Animation runAnimation, Animation idleAnimation, Animation jumpAnimation, Animation deadAnimation, Animation AttackAnimation)
         {
             this.runAnimation = runAnimation;
             this.idleAnimation = idleAnimation;
             this.jumpAnimation = jumpAnimation;
+            this.deadAnimation = deadAnimation;
+            this.attackAnimation = AttackAnimation;
             currentAnimation = idleAnimation;
         }
 
         public void UpdateAnimation()
         {
-            runAnimation.position = position;
-            idleAnimation.position = position;
-            jumpAnimation.position = position;
-            currentAnimation.position = position;
+            runAnimation.Position = position;
+            idleAnimation.Position = position;
+            jumpAnimation.Position = position;
+            deadAnimation.Position = position;
+            attackAnimation.Position = position;
+            currentAnimation.Position = position;
 
             runAnimation.Update();
             idleAnimation.Update();
             jumpAnimation.Update();
+            deadAnimation.Update();
+            attackAnimation.Update();
         }
 
         public void Draw(SpriteBatch spriteBatch)

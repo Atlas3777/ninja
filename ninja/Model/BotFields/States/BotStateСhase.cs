@@ -1,13 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
-using ninja.Model;
+using ninja.Controller;
+using ninja.Extensions;
+using ninja.Model.BotFields.States;
 
 namespace ninja.Model.BotFields.States
 {
     public class BotStateСhase : BotState
     {
-        public Bot bot;
-        public Player player;
+        private Bot bot;
+        private float posInTileX;
+        private float posInTileY;
+        private float posPlayerInTileX;
+        private float posPlayerInTileY;
         public BotStateСhase(Bot bot)
         {
             this.bot = bot;
@@ -15,30 +22,72 @@ namespace ninja.Model.BotFields.States
 
         public override void Execute()
         {
+            var pathToPlayer = FindPathToPlayer();
 
-
-
-            RR(400);
-
+            if (pathToPlayer != null && pathToPlayer.Count > 0)
+                MoveToNextPoint(pathToPlayer);
 
         }
-        private void RR(float speed)
+
+        private List<Rectangle> FindPathToPlayer()
         {
-            if (Math.Abs(bot.Route.CurrentVector.Center.X - bot.BoundingRectangle.Center.X) <= 16 && bot.BoundingRectangle.Bottom <= bot.Route.CurrentVector.Bottom)
-            {
-                bot.Route.Next();
-            }
-            var newPoint = bot.Route.CurrentVector;
+             posInTileX = (float)Math.Floor((float)bot.BoundingRectangle.Center.X / Tile.Width);
+             posInTileY = (float)Math.Floor((float)bot.BoundingRectangle.Bottom / Tile.Height)-1;
 
-            if (bot.BoundingRectangle.Bottom > newPoint.Bottom)
+             posPlayerInTileX = (float)Math.Floor((float)PlayerController.Player.BoundingRectangle.Center.X / Tile.Width);
+             posPlayerInTileY = (float)Math.Floor((float)PlayerController.Player.BoundingRectangle.Bottom / Tile.Height)-1;
+
+
+            var botPosition = new Vector2(posInTileX, posInTileY);
+            var playerPosition = new Vector2(posPlayerInTileX, posPlayerInTileY);
+
+            var pathfinder = new PathFinding();
+
+
+            var map = LoaderMap.LoadMap1("../../../Data/5_Collisions.csv");
+
+            List<Vector2> path = pathfinder.FindPathBFS2(map, botPosition, playerPosition);
+
+            var list = path
+                .Select(x => new Rectangle(
+                    (int)x.X * Tile.Width,
+                    (int)x.Y * Tile.Height,
+                    (int)(Tile.Width),
+                    (int)(Tile.Height)))
+                .ToList();
+
+            return list;
+        }
+
+        public void MoveToNextPoint(List<Rectangle> path)
+        {
+            if (path == null)
+                return;
+
+            if (bot.BoundingRectangle.GetIntersectionDepth(path.First()) != Vector2.Zero);
             {
+                path.RemoveAt(0);
+            }
+
+            if (path.Count==0)
+                return;
+
+            var newPoint = path.First();
+            var botRect = bot.BoundingRectangle;
+
+            if (botRect.Bottom > newPoint.Bottom)
                 bot.isJumping = true;
-            }
 
-            if (bot.BoundingRectangle.Center.X < newPoint.Center.X)
-                bot.movement += speed;
+            if (botRect.Center.X > newPoint.Center.X)
+                bot.movement = -300;
             else
-                bot.movement += -speed;
+                bot.movement = 300;
+
+            var rnd = new Random();
+            if (rnd.Next(1, 20) == 1)
+            {
+                bot.isJumping = false;
+            }
         }
     }
 }

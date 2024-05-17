@@ -8,9 +8,16 @@ namespace ninja.Model
 {
     public class Bot
     {
+        public int HP;
+        public bool IsAlive
+        {
+            get { return isAlive; }
+        }
+        bool isAlive;
+
         public Route Route;
 
-        public BotStateMachine stateMachine;
+        public BotStateMachine StateMachine;
 
         #region physicsProp
         public Vector2 Position
@@ -28,26 +35,33 @@ namespace ninja.Model
         }
         Vector2 velocity;
 
+        enum FaceDirection
+        {
+            Left = 1,
+            Right = -1,
+        }
+
+        FaceDirection faceDirection = FaceDirection.Right;
+
         private const float MaxMoveSpeed = 1750.0f;
         private const float GroundDragFactor = 0.48f;
         private const float AirDragFactor = 0.58f;
 
-        private const float MaxJumpTime = 0.35f;
+        private const float MaxJumpTime = 0.65f;
         private const float JumpLaunchVelocity = -2500.0f;
         private const float GravityAcceleration = 3400.0f;
         private const float MaxFallSpeed = 550.0f;
-        private const float JumpControlPower = 0.20f;
+        private const float JumpControlPower = 0.40f;
 
         public bool IsOnGround
         {
             get { return isOnGround; }
         }
-        bool isOnGround;
+        private bool isOnGround;
 
-
+        
         //private float movement;
         public float movement;
-
 
         //private bool isJumping;
         public bool isJumping;
@@ -56,8 +70,8 @@ namespace ninja.Model
 
         private Rectangle localBounds;
 
-        public int OffsetX = 50 * 0;
-        public int OffsetY = 37 * 0;
+        public int OffsetX = 60;
+        public int OffsetY = 60;
         public Rectangle BoundingRectangle
         {
             get
@@ -68,33 +82,75 @@ namespace ninja.Model
                 return new Rectangle(left, top, localBounds.Width - (OffsetX * 2), localBounds.Height - OffsetY);
             }
         }
-        private List<Rectangle> collisions;
+        private readonly List<Rectangle> collisions;
         #endregion
 
-        public Rectangle FieldOfView;
 
+        public bool IsAttacking;
 
-        //private Rectangle UpdateState(Player player)
-        //{
-        //    var target = player.BoundingRectangle.Center;
-        //    return target;
-        //}
-
-        
-
-
-        #region physicsMethod
-        public Bot(List<Rectangle> collisions, Rectangle localBounds)
+        public Rectangle FieldOfView
         {
-            this.stateMachine = new BotStateMachine(this);
-            
-            stateMachine.CurrentState = stateMachine.BotStates["Patrolling"];
-            Route = new Route(this);
-            this.collisions = collisions;
-            this.localBounds = localBounds;
+            get 
+            {
+                return new Rectangle(
+                AttackRangeRectangle.X,
+                AttackRangeRectangle.Y,
+                AttackRangeRectangle.Width,
+                AttackRangeRectangle.Height);
+            }
+        }
+        private readonly int attackRange = 50;
+        public Rectangle AttackRangeRectangle
+        {
+            get
+            {
+                int x;
+                int top = BoundingRectangle.Top;
+                if (faceDirection == FaceDirection.Right)
+                {
+                     x = BoundingRectangle.Right;
+                     top = BoundingRectangle.Top;
 
+                    return new Rectangle(x, top, attackRange, localBounds.Height - OffsetY);
+                }
+
+                x = BoundingRectangle.Left - attackRange;
+                return new Rectangle(x, top, attackRange, localBounds.Height - OffsetY);
+            }
+        }
+        public void ResetMovement()
+        {
+            movement = 0;
+            isJumping = false;
         }
 
+        public void Attack(Player player)
+        {
+            player.TakeDamage(1); 
+        }
+        public void TakeDamage(int amount)
+        {
+            HP -= amount;
+            if (HP <= 0)
+            {
+                isAlive = false;
+            }
+        }
+
+
+        public Bot(List<Rectangle> collisions, Rectangle localBounds)
+        {
+            isAlive = true;
+            HP = 10;
+            this.StateMachine = new BotStateMachine(this);
+            StateMachine.CurrentState = StateMachine.BotStates["Patrolling"];
+            Route = new Route(this);
+            Position = new(1000, 500);  
+            this.collisions = collisions;
+            this.localBounds = localBounds;
+        }
+
+        #region physicsMethod
         public Rectangle CalculateCollision(Rectangle rectangle)
         {
             return new Rectangle((int)Position.X, (int)Position.Y, rectangle.Width, rectangle.Height);

@@ -24,13 +24,5 @@ namespace ninja.Model.BotFields
             BotStates.Add("Suspicion", botStateSuspicion);
             BotStates.Add("Сhase", botStateСhase);
         }
-
-
-        public void ChengeState()
-        {
-
-
-
-        }
     }
 }

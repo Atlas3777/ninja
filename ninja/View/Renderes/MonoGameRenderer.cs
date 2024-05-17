@@ -67,6 +67,7 @@ namespace ninja.View.Renderes
             tileMap.Draw(SpriteBatch);
             foreach (var bot in bots)
             {
+                bot.UpdateAnimation();
                 bot.Draw(SpriteBatch);
             }
             //bot.Draw(SpriteBatch);

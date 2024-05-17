@@ -1,13 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Microsoft.Xna.Framework.Audio;
-using System.IO;
 using ninja.View.Renderes;
-using ninja.Controller.Scenes;
 
 
 namespace ninja.Controller

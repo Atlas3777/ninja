@@ -18,6 +18,7 @@ namespace ninja.Controller
 
             Scenes.Add("MainMenuScene", mainMenuScene);
             Scenes.Add("GameScene", gameScene);
+            gameScene.Initialize();
         }
 
         public static void ChengeScene(string sceneName)

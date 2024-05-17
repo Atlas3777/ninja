@@ -2,12 +2,19 @@
 using ninja.Extensions;
 using System;
 using System.Collections.Generic;
+using static ninja.View.Enums.FaceDirect;
 
 namespace ninja.Model
 {
     public class Player
     {
         public int HP;
+        public bool IsAlive
+        {
+            get { return isAlive; }
+        }
+        bool isAlive;
+
 
         public Vector2 Position
         {
@@ -28,18 +35,18 @@ namespace ninja.Model
         private const float GroundDragFactor = 0.48f;
         private const float AirDragFactor = 0.58f;
 
-        private const float MaxJumpTime = 0.35f;
-        private const float JumpLaunchVelocity = -2500.0f;
+        public /*private*/ /*const*/ float MaxJumpTime = 0.35f;
+        public /*private*/ /*const*/ float JumpLaunchVelocity = -2500.0f;
         private const float GravityAcceleration = 3400.0f;
         private const float MaxFallSpeed = 550.0f;
-        private const float JumpControlPower = 0.20f;
+        public /*private*/ /*const*/ float JumpControlPower = 0.20f;
 
         public bool IsOnGround
         {
             get { return isOnGround; }
         }
-        bool isOnGround;
-
+        private bool isOnGround;
+        
 
         //private float movement;
         public float movement;
@@ -54,6 +61,8 @@ namespace ninja.Model
 
         public int OffsetX = 50; 
         public int OffsetY = 36; 
+
+        
         public Rectangle BoundingRectangle
         {
             get
@@ -65,22 +74,62 @@ namespace ninja.Model
             }
         }
         private List<Rectangle> collisions;
+        private FaceDirection faceDirection;
 
-
-        public Player(Vector2 position, List<Rectangle> collisions, Rectangle localBounds, int offsetX, int offsetY)
+        public bool IsAttacking;
+        private readonly int attackRange = 200;
+        public Rectangle AttackRangeRectangle
         {
+            get
+            {
+                int x;
+                int top = BoundingRectangle.Top;
+                if (faceDirection == FaceDirection.Right)
+                {
+                    x = BoundingRectangle.Right;
+                    top = BoundingRectangle.Top;
+
+                    return new Rectangle(x, top, attackRange, localBounds.Height - OffsetY);
+                }
+
+                x = BoundingRectangle.Left - attackRange;
+                return new Rectangle(x, top, attackRange, localBounds.Height - OffsetY);
+            }
+        }
+        public void ResetToNext()
+        {
+            movement = 0;
+            isJumping = false;
+            IsAttacking = false;
+        }
+
+        public void TakeDamage(int damageAmount)
+        {
+            
+            HP -= damageAmount;
+            if (HP <= 0)
+                isAlive = false;
+        }
+        public void Attack(Bot bot)
+        {
+            bot.TakeDamage(10); // Наносим урон в 10 единиц
+        }
+
+
+
+        public Player(Vector2 position, List<Rectangle> collisions, Rectangle localBounds)
+        {
+            isAlive = true;
+            HP = 10;
             this.position = position;
             this.collisions = collisions;
             this.localBounds = localBounds;
-            //OffsetX = offsetX;
-            //OffsetY = offsetY;
         }
 
         public Rectangle CalculateCollision(Rectangle rectangle)
         {
             return new Rectangle((int)Position.X, (int)Position.Y, rectangle.Width, rectangle.Height);
         }
-
 
         public void ApplyPhysics(GameTime gameTime)
         {
@@ -139,8 +188,6 @@ namespace ninja.Model
             return velocityY;
         }
 
-
-
         private void HandleCollisions()
         {
             Rectangle bounds = BoundingRectangle;
@@ -175,6 +222,7 @@ namespace ninja.Model
 
             previousBottom = bounds.Bottom;
         }
+
 
     }
 }

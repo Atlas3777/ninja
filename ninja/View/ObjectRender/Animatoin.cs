@@ -7,8 +7,8 @@ namespace ninja.View.ObjectRender
     {
         private readonly Texture2D spriteSheet;
 
-        private int frameCount;
-        private int columsCount;
+        private readonly int frameCount;
+        private readonly int columsCount;
         private Vector2 size;
 
         private int counter = 0;
@@ -18,7 +18,7 @@ namespace ninja.View.ObjectRender
         private int rowPos = 0;
         private int colPos = 0;
 
-        public Vector2 position { get; set; }
+        public Vector2 Position { get; set; }
 
         public Animation(Texture2D spriteSheet, int frameCount, int columsCount, Vector2 size, int interval = 3)
         {
@@ -85,7 +85,7 @@ namespace ninja.View.ObjectRender
         {
             get
             {
-                return new Rectangle((int)position.X, (int)position.Y, (int)size.X, (int)size.Y);
+                return new Rectangle((int)Position.X, (int)Position.Y, (int)size.X, (int)size.Y);
             }
         }
     }

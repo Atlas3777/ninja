@@ -10,6 +10,14 @@ namespace ninja.Extensions
 {
     public static class LoaderMap
     {
+        //public static List<Vector2> collisions;
+        //public static void Initialize()
+        //{
+        //    collisions = LoadMap()
+
+
+        //}
+
         public static Dictionary<Vector2, int> LoadMap(string filepath)
         {
             var result = new Dictionary<Vector2, int>();
@@ -34,6 +42,34 @@ namespace ninja.Extensions
                         {
                             result[new Vector2(x, y)] = value;
                         }
+                    }
+                }
+                y++;
+            }
+
+            return result;
+        }
+        public static Dictionary<Vector2, int> LoadMap1(string filepath)
+        {
+            var result = new Dictionary<Vector2, int>();
+
+            var reader = new StreamReader(filepath);
+
+            int y = 0;
+            int xSize = 0;
+            string line;
+
+
+            while ((line = reader.ReadLine()) != null)
+            {
+                var items = line.Split(',');
+                xSize = Math.Max(items.Length, xSize);
+
+                for (int x = 0; x < items.Length; x++)
+                {
+                    if (int.TryParse(items[x], out int value))
+                    {
+                            result[new Vector2(x, y)] = value;
                     }
                 }
                 y++;

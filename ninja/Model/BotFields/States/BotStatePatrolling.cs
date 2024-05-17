@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ninja.Controller;
+using ninja.Extensions;
+using System;
 
 namespace ninja.Model.BotFields.States
 {
@@ -16,7 +18,7 @@ namespace ninja.Model.BotFields.States
         }
         public void MoveToNextPoint(float speed)
         {
-            if (bot.BoundingRectangle.Intersects(bot.Route.CurrentVector))
+            if (bot.BoundingRectangle.GetIntersectionDepth(bot.Route.CurrentVector) != Microsoft.Xna.Framework.Vector2.Zero)
             {
                 bot.Route.Next();
             }
@@ -27,11 +29,16 @@ namespace ninja.Model.BotFields.States
                 bot.isJumping = true;
             }
 
+            var rnd = new Random();
+            if (rnd.Next(1, 20) == 1)
+            {
+                bot.isJumping = false;
+            }
+
             if (bot.BoundingRectangle.Center.X < newPoint.Center.X)
                 bot.movement = speed;
             else 
                 bot.movement = -speed;
-
 
         }
     }

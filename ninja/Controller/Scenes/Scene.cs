@@ -7,7 +7,6 @@ namespace ninja.Controller.Scenes
     {
         public Scene()
         {
-
         }
 
         public abstract void Update(GameTime gameTime);

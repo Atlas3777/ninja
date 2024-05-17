@@ -51,8 +51,8 @@ namespace ninja.Model.BotFields
                 .Select(x => x.Key)
                 .FirstOrDefault();
 
-            var pathfinder = new Pathfinding();
-            var path = pathfinder.FindPath(pairsVectorValue, start, end, 0);
+            var pathfinder = new PathFinding();
+            var path = pathfinder.FindPathDFS(pairsVectorValue, start, end, 0);
 
             var list = path
                 .Select(x => new Rectangle(
@@ -67,31 +67,31 @@ namespace ninja.Model.BotFields
         }
     }
 
-    public class Pathfinding
+    public class PathFinding
     {
-        private static readonly Vector2[] Directions = {
-        new Vector2(-1, 0),  // Left
-        new Vector2(1, 0),   // Right
-        new Vector2(0, -1),  // Down
-        new Vector2(0, 1),   // Up
-        new Vector2(-1, -1), // Left-Down
-        new Vector2(1, -1),  // Right-Down
-        new Vector2(-1, 1),  // Left-Up
-        new Vector2(1, 1)   // Right-Up
+        private static readonly Vector2[] Directionss = {
+        new Vector2(-1, 0),  
+        new Vector2(1, 0),   
+        new Vector2(0, -1), 
+        new Vector2(0, 1),   
+        new Vector2(-1, -1), 
+        new Vector2(1, -1),
+        new Vector2(-1, 1),  
+        new Vector2(1, 1)   
         };
 
-        public List<Vector2> FindPath(Dictionary<Vector2, int> field, Vector2 start, Vector2 end, int specialCellType)
+        public List<Vector2> FindPathDFS(Dictionary<Vector2, int> field, Vector2 start, Vector2 end, int specialCellType)
         {
             var visited = new HashSet<Vector2>();
             var path = new List<Vector2>();
 
             if (DFS(field, start, end, specialCellType, visited, path))
             {
-                path.Reverse(); // reverse the path to get from start to end
+                path.Reverse();
                 return path;
             }
 
-            return new List<Vector2>(); // return empty list if no path found
+            return new List<Vector2>(); 
         }
 
         private bool DFS(Dictionary<Vector2, int> field, Vector2 current, Vector2 end, int specialCellType, HashSet<Vector2> visited, List<Vector2> path)
@@ -109,7 +109,7 @@ namespace ninja.Model.BotFields
                 return true;
             }
 
-            foreach (var direction in Directions)
+            foreach (var direction in Directionss)
             {
                 var neighbor = current + direction;
                 if (DFS(field, neighbor, end, specialCellType, visited, path))
@@ -121,6 +121,59 @@ namespace ninja.Model.BotFields
 
             return false;
         }
+
+        private static readonly Vector2[] Directions = {
+            new Vector2(-1, 0),
+            new Vector2(1, 0),   
+            new Vector2(0, -1),  
+        };
+
+        public List<Vector2> FindPathBFS2(Dictionary<Vector2, int> field, Vector2 start, Vector2 end)
+        {
+            if (!field.ContainsKey(start) || !field.ContainsKey(end))
+            {
+                return new List<Vector2>();
+            }
+
+            var queue = new Queue<Vector2>();
+            var visited = new HashSet<Vector2>();
+            var parent = new Dictionary<Vector2, Vector2>();
+
+            queue.Enqueue(start);
+            visited.Add(start);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+
+                if (current == end)
+                {
+                    var path = new List<Vector2>();
+                    while (current != start)
+                    {
+                        path.Add(current);
+                        current = parent[current];
+                    }
+                    path.Add(start);
+                    path.Reverse(); 
+                    return path;
+                }
+
+                foreach (var direction in Directions)
+                {
+                    var neighbor = current + direction;
+                    if (field.ContainsKey(neighbor) && field[neighbor] == -1 && !visited.Contains(neighbor))
+                    {
+                        queue.Enqueue(neighbor);
+                        visited.Add(neighbor);
+                        parent[neighbor] = current;
+                    }
+                }
+            }
+
+            return new List<Vector2>();
+        }
+
     }
 }
 

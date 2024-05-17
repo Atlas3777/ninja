@@ -8,79 +8,66 @@ namespace ninja.Controller.Scenes
 {
     public class GameScene : Scene
     {
-        TileMap tileMap;
-        List<Rectangle> collisions;
-        Player player;
-        Bot bot;
+        private TileMap tileMap;
+        private List<Rectangle> collisions;
+        private Player player;
         
         public GameScene()
         {
+            
+        }
+
+        public void Initialize()
+        {
             tileMap = new TileMap();
-            collisions = tileMap.collisions;
-            var playerPos = EntryPoint.game.Renderer.player.position;
+            collisions = tileMap.Collisions;
+            player = new Player(Vector2.One, collisions, EntryPoint.game.Renderer.player.idleAnimation.RectPositions);
+            PlayerController.Player = player;
+            player.Position = new(500, 640);
 
-            //bot = new Bot(collisions, EntryPoint.game.Renderer.bot.Sprite.Rectangle);
 
-            player = new Player(playerPos, collisions, EntryPoint.game.Renderer.player.idleAnimation.RectPositions, 0, 0);
-
-            player.Position = new(2000, 600);
-            var i = 1;
             foreach (var bot in EntryPoint.game.Renderer.bots)
             {
-                bot.Sprite.Rectangle.Location = new Point(i * 700, bot.Sprite.Rectangle.Y);
-                var bot2 = new Bot(collisions, bot.Sprite.Rectangle);
-                bot2.Position = new(2000, 600);
-                BotController.bots.Add(bot2);
-                i++;
+                var bot2 = new Bot(collisions, bot.runAnimation.RectPositions);
+                bot2.Position = new(200, 200);
+                BotController.Bots.Add(bot2);
             }
-            //BotController.bots.Add(bot);
         }
-        
-
 
         public override void Update(GameTime gameTime)
         {
-            
-            var keyboard = Keyboard.GetState();
-
-
-            if (keyboard.IsKeyDown(Keys.D))
-            {
-                player.movement = 300f;
-                EntryPoint.game.Renderer.player.currentAnimation = EntryPoint.game.Renderer.player.runAnimation;
-                EntryPoint.game.Renderer.player.direction = View.ObjectRender.PlayerV.FaceDirection.Right;
-            }
-            else if (keyboard.IsKeyDown(Keys.A))
-            {
-                player.movement = -300f;
-                EntryPoint.game.Renderer.player.currentAnimation = EntryPoint.game.Renderer.player.runAnimation;
-                EntryPoint.game.Renderer.player.direction = View.ObjectRender.PlayerV.FaceDirection.Left;
-            }
-            else
-                EntryPoint.game.Renderer.player.currentAnimation = EntryPoint.game.Renderer.player.idleAnimation;
-
-            if (keyboard.IsKeyDown(Keys.Space))
-            {
-                player.isJumping = true;
-                
-            }
-            //if(player.isJumping)
-            //    EntryPoint.game.Renderer.player.currentAnimation = EntryPoint.game.Renderer.player.jumpAnimation;
-
-
+            PlayerController.GetInput(Keyboard.GetState());
             player.ApplyPhysics(gameTime);
-
-            BotController.Update(gameTime, player.BoundingRectangle);
-           
-            //var text = $"{player.Velocity}  \n{player.movement}\n{player.IsOnGround}\n{player.Position}";
-
-
             EntryPoint.game.Renderer.player.position = player.Position;
-            //EntryPoint.game.Renderer.text.Text = text;
 
-            player.movement = 0.0f;
-            player.isJumping = false;
+            if (!PlayerController.Player.IsAlive)
+            {
+                EntryPoint.game.Renderer.player.currentAnimation = EntryPoint.game.Renderer.player.deadAnimation;
+            }
+
+            if (PlayerController.Player.BoundingRectangle.Intersects(BotController.Bots[1].BoundingRectangle))
+            {
+                PlayerController.Player.Position = new(500, 600);
+            }
+
+            if (PlayerController.Player.BoundingRectangle.Intersects(new Rectangle(0, 400, 100, 100)))
+            {
+                player.MaxJumpTime = 2;
+                player.JumpControlPower = -2f;
+                player.JumpLaunchVelocity = -4000f;
+            }
+;
+
+
+
+
+
+            EntryPoint.game.Renderer.text.Text = $"{PlayerController.Player.HP} \n {BotController.Bots[0].Position} + \n {BotController.Bots[0].HP}";
+
+            BotController.Update(gameTime);
+            player.ResetToNext();
         }
+
 
         public override void Draw(MonogameRenderer renderer)
         {
