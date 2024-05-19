@@ -49,7 +49,7 @@ namespace ninja.Controller.Scenes
                 PlayerController.Player.Position = new(500, 600);
             }
 
-            if (PlayerController.Player.BoundingRectangle.Intersects(BotController.Bots[1].BoundingRectangle))
+            if (PlayerController.Player.BoundingRectangle.Intersects(BotController.Bots[0].BoundingRectangle))
             {
                 PlayerController.Player.Position = new(500, 600);
             }

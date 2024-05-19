@@ -34,6 +34,7 @@ namespace ninja.Controller
 
                 EntryPoint.game.Renderer.bots[i].position = bot.Position;
                 UpdateState(bot, i);
+                UpdateFaceDirection(bot, i);
 
                 if (bot.IsAttacking && PlayerController.Player.BoundingRectangle.Intersects(bot.AttackRangeRectangle))
                 {
@@ -41,7 +42,6 @@ namespace ninja.Controller
                 }
                 if (PlayerController.Player.IsAttacking && PlayerController.Player.AttackRangeRectangle.Intersects(bot.BoundingRectangle))
                 {
-                    
                     PlayerController.Player.Attack(bot);
                 }
                 bot.ResetMovement();

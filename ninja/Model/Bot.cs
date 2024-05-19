@@ -70,7 +70,7 @@ namespace ninja.Model
 
         private Rectangle localBounds;
 
-        public int OffsetX = 60;
+        public int OffsetX = 100;
         public int OffsetY = 60;
         public Rectangle BoundingRectangle
         {
